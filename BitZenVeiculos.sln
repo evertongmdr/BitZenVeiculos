@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BitZenVeiculos.Domain", "Bi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BitZenVeiculos.Repository", "BitZenVeiculos.Repository\BitZenVeiculos.Repository.csproj", "{80B38FC2-D8A3-44E2-8E03-EAE6F89325E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitZenVeiculo.API", "BitZenVeiculo.API\BitZenVeiculo.API.csproj", "{45943533-4363-4634-ABF1-BEB0FF5EE10E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BitZenVeiculos.API", "BitZenVeiculo.API\BitZenVeiculos.API.csproj", "{45943533-4363-4634-ABF1-BEB0FF5EE10E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{80B38FC2-D8A3-44E2-8E03-EAE6F89325E2} = {80B38FC2-D8A3-44E2-8E03-EAE6F89325E2}
 	EndProjectSection

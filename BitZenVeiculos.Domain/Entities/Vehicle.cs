@@ -1,5 +1,5 @@
 ﻿using BitZenVeiculos.Domain.Enums;
-using BitZenVeiculos.Domain.ValidationAttributes;
+using BitZenVeiculos.Domain.Helpers.ValidationAttributes;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -19,8 +19,8 @@ namespace BitZenVeiculos.Domain.Entities
         public string LicensePlate { get; set; }
 
         [Required(ErrorMessage = "A quilometragem é obrigatória")]
-        [Range(1, int.MaxValue, ErrorMessage = "A quilometragem deve ser maior que zero")]
-        public int Mileage { get; set; }
+        [Range(0, 2000000, ErrorMessage = "A quilometragem deve estar entre o intervalo de 0 a 2.000.000 de quilometros")]
+        public decimal Mileage { get; set; }
         public string UrlPhoto { get; set;}
 
         [Required(ErrorMessage = "O Tipo do veículo é obrigatório")]
