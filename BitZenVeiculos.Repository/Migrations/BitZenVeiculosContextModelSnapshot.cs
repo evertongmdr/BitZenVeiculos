@@ -134,16 +134,16 @@ namespace BitZenVeiculos.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("MakeId")
+                    b.Property<Guid>("MakeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Mileage")
                         .HasColumnType("decimal(9,2)");
 
-                    b.Property<Guid?>("ModelId")
+                    b.Property<Guid>("ModelId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ResponsibleUserId")
+                    b.Property<Guid>("ResponsibleUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UrlPhoto")
@@ -181,15 +181,21 @@ namespace BitZenVeiculos.Repository.Migrations
                 {
                     b.HasOne("BitZenVeiculos.Domain.Entities.Make", "Make")
                         .WithMany("Vehicles")
-                        .HasForeignKey("MakeId");
+                        .HasForeignKey("MakeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("BitZenVeiculos.Domain.Entities.Model", "Model")
                         .WithMany("Vehicles")
-                        .HasForeignKey("ModelId");
+                        .HasForeignKey("ModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("BitZenVeiculos.Domain.Entities.User", "ResponsibleUser")
                         .WithMany("Veichles")
-                        .HasForeignKey("ResponsibleUserId");
+                        .HasForeignKey("ResponsibleUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

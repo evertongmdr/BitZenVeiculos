@@ -29,6 +29,10 @@ namespace BitZenVeiculo.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddCors();
+            services.AddControllers().
+               AddNewtonsoftJson(options =>
+               options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             var key = Encoding.ASCII.GetBytes(Settings.Secret);
 
@@ -51,8 +55,13 @@ namespace BitZenVeiculo.API
               });
 
             services.AddDbContext<BitZenVeiculosContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+          
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IVehicleRepository, VehicleRepository>();
+            services.AddScoped<IMakeRepository, MakeRepository>();
+            services.AddScoped<IModelRepository, ModelRepository>();
+            services.AddScoped<IFuelSupplyRepository, FuelSupplyRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,6 +74,12 @@ namespace BitZenVeiculo.API
 
             app.UseRouting();
 
+            app.UseCors(x => x
+              .AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

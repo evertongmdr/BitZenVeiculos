@@ -10,12 +10,10 @@ namespace BitZenVeiculos.Domain.Contracts
     {
         Task<User> GetUser(Guid userId);
         IEnumerable<Vehicle> GetVehicleByUser(Guid userId);
-        bool UserExists(Guid userId);
+        Task<bool> UserExists(Guid userId);
         bool CreateUser(User user);
-        bool UpdateUser(User user);
         User LoginUser(LoginRequestDTO user);
         Task<bool> EmailExists(string email);
         bool Save();
-        IEnumerable<User> GetUsers();
     }
 }

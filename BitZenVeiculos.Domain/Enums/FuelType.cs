@@ -1,27 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
+﻿using System.ComponentModel;
 
 namespace BitZenVeiculos.Domain.Enums
 {
     public enum FuelType
     {
         [Description("Gasolina Comum")]
-        GasolinaComum = 0,
+        GasolinaComum = 1,
         [Description("Gasolina Aditiva")]
-        GasolinaAditiva = 1,
+        GasolinaAditiva = 2,
         [Description("Gasolina Premium")]
-        GasolinaPremium = 2,
+        GasolinaPremium = 3,
         [Description("Etanol Aditivo")]
-        EtanolAditivo = 3,
+        EtanolAditivo = 4,
         [Description("Gás Natural Veicular")]
-        GasNaturalVeicular = 4,
+        GasNaturalVeicular = 5,
         [Description("Diesel S-10")]
-        DieselS10 = 5,
+        DieselS10 = 6,
         [Description("Diesel Aditivo")]
-        DieselAditivo = 6,
+        DieselAditivo = 7,
         [Description("Diesel Premium")]
-        DieselPremium = 7
+        DieselPremium = 8
     }
 }

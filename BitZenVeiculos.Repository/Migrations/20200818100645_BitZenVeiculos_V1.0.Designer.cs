@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BitZenVeiculos.Repository.Migrations
 {
     [DbContext(typeof(BitZenVeiculosContext))]
-    [Migration("20200816203857_BitZenVeiculos_V1")]
-    partial class BitZenVeiculos_V1
+    [Migration("20200818100645_BitZenVeiculos_V1.0")]
+    partial class BitZenVeiculos_V10
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -136,16 +136,16 @@ namespace BitZenVeiculos.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("MakeId")
+                    b.Property<Guid>("MakeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Mileage")
                         .HasColumnType("decimal(9,2)");
 
-                    b.Property<Guid?>("ModelId")
+                    b.Property<Guid>("ModelId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ResponsibleUserId")
+                    b.Property<Guid>("ResponsibleUserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UrlPhoto")
@@ -183,15 +183,21 @@ namespace BitZenVeiculos.Repository.Migrations
                 {
                     b.HasOne("BitZenVeiculos.Domain.Entities.Make", "Make")
                         .WithMany("Vehicles")
-                        .HasForeignKey("MakeId");
+                        .HasForeignKey("MakeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("BitZenVeiculos.Domain.Entities.Model", "Model")
                         .WithMany("Vehicles")
-                        .HasForeignKey("ModelId");
+                        .HasForeignKey("ModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("BitZenVeiculos.Domain.Entities.User", "ResponsibleUser")
                         .WithMany("Veichles")
-                        .HasForeignKey("ResponsibleUserId");
+                        .HasForeignKey("ResponsibleUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

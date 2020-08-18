@@ -1,11 +1,10 @@
-﻿using BitZenVeiculos.Domain.Contracts;
+﻿using AutoMapper;
+using BitZenVeiculos.Domain.Contracts;
 using BitZenVeiculos.Domain.Entities;
-using BitZenVeiculos.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System;
-using System.Collections.Generic;
-using System.Dynamic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,28 +14,41 @@ namespace BitZenVeiculos.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UsersController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
-        public UsersController(IUserRepository userRepository)
+        private readonly IMapper _mapper;
+        public UsersController(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
+            _mapper = mapper;
 
         }
 
         [HttpPost]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(409)]
         [ProducesResponseType(500)]
-        public IActionResult CreateUser([FromBody] User user)
+        [AllowAnonymous]
+
+        public async Task <IActionResult> CreateUser([FromBody] User user)
         {
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+ 
 
+            if (await _userRepository.EmailExists(user.Email))
+            {
+                ModelState.AddModelError("", $"O e-mail {user.Email} já está cadastrado, tente outro");
+                return StatusCode(409, ModelState);
+            }
+                
             if (!_userRepository.CreateUser(user))
             {
-                ModelState.AddModelError("", $" Ocorreu um erro ao salvar usuário {user.FullName} ");
+                ModelState.AddModelError("", $"Ocorreu um erro ao salvar usuário {user.FullName} ");
                 return StatusCode(500, ModelState);
             }
 
@@ -51,6 +63,9 @@ namespace BitZenVeiculos.API.Controllers
         {
             var user = await _userRepository.GetUser(userId);
 
+            if (user == null)
+                return NotFound();
+
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -58,37 +73,22 @@ namespace BitZenVeiculos.API.Controllers
         }
 
         [HttpPost("login")]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(200, Type = typeof(LoginResponseDTO))]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
+        [AllowAnonymous]
+
         public IActionResult LoginUser([FromBody] LoginRequestDTO userLogin)
         {
             var userEntity = _userRepository.LoginUser(userLogin);
 
-            dynamic user = new ExpandoObject();
-            var userDic = (IDictionary<string, object>)user;
-
             if (userEntity == null)
                 return NotFound();
 
-            var token = GenerateToken();
-            var properties = userEntity.GetType().GetProperties();
+            var loginResponse =  _mapper.Map<LoginResponseDTO>(userEntity);
+            loginResponse.token = GenerateToken();
 
-            foreach (var p in properties)
-            {
-                userDic.Add(p.Name.ToLower(), p.GetValue(userEntity));
-            }
-
-            user.token = token;
-
-
-            return Ok(new
-            {
-                userEntity.Id,
-                token = token
-            });
-
-
+            return Ok(loginResponse);
         }
 
         public string GenerateToken()
@@ -99,7 +99,7 @@ namespace BitZenVeiculos.API.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
 
-                Expires = DateTime.UtcNow.AddMinutes(3),
+                Expires = DateTime.UtcNow.AddMinutes(15),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 

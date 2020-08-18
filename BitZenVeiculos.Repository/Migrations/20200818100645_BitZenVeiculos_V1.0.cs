@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace BitZenVeiculos.Repository.Migrations
 {
-    public partial class BitZenVeiculos_V1 : Migration
+    public partial class BitZenVeiculos_V10 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -50,15 +50,15 @@ namespace BitZenVeiculos.Repository.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
+                    ModelId = table.Column<Guid>(nullable: false),
+                    MakeId = table.Column<Guid>(nullable: false),
+                    ResponsibleUserId = table.Column<Guid>(nullable: false),
                     Year = table.Column<int>(nullable: false),
                     LicensePlate = table.Column<string>(nullable: false),
                     Mileage = table.Column<decimal>(type: "decimal(9,2)", nullable: false),
                     UrlPhoto = table.Column<string>(nullable: true),
                     VehicleType = table.Column<int>(nullable: false),
-                    FuelType = table.Column<int>(nullable: false),
-                    ModelId = table.Column<Guid>(nullable: true),
-                    MakeId = table.Column<Guid>(nullable: true),
-                    ResponsibleUserId = table.Column<Guid>(nullable: true)
+                    FuelType = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -68,19 +68,19 @@ namespace BitZenVeiculos.Repository.Migrations
                         column: x => x.MakeId,
                         principalTable: "Makes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Vehicles_Models_ModelId",
                         column: x => x.ModelId,
                         principalTable: "Models",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Vehicles_Users_ResponsibleUserId",
                         column: x => x.ResponsibleUserId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -88,14 +88,14 @@ namespace BitZenVeiculos.Repository.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
+                    ResponsibleUserId = table.Column<Guid>(nullable: true),
+                    VehicleId = table.Column<Guid>(nullable: true),
                     SupplyedMileage = table.Column<decimal>(type: "decimal(9,2)", nullable: false),
                     SupplyedLiters = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
                     ValuePay = table.Column<decimal>(type: "decimal(6,2)", nullable: false),
                     DateOfSupply = table.Column<DateTime>(nullable: false),
                     FuelStation = table.Column<string>(maxLength: 100, nullable: false),
-                    FuelType = table.Column<int>(nullable: false),
-                    ResponsibleUserId = table.Column<Guid>(nullable: true),
-                    VehicleId = table.Column<Guid>(nullable: true)
+                    FuelType = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {

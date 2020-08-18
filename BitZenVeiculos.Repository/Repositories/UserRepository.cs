@@ -22,12 +22,7 @@ namespace BitZenVeiculos.Repository.Repositories
             _userContext.Add(user);
             return Save();
         }
-        public bool UpdateUser(User user)
-        {
-            _userContext.Add(user);
-            return Save();
-        }
-
+      
         public async Task<User> GetUser(Guid userId)
         {
             if (userId == Guid.Empty)
@@ -35,21 +30,14 @@ namespace BitZenVeiculos.Repository.Repositories
 
             return await _userContext.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
         }
-
-        public IEnumerable<User> GetUsers()
-        {
-            return _userContext.Users.AsNoTracking();
-        }
-
-
         public IEnumerable<Vehicle> GetVehicleByUser(Guid userId)
         {
             return _userContext.Vehicles.AsNoTracking().Where(v => v.ResponsibleUser.Id == userId).ToList();
         }
 
-        public bool UserExists(Guid userId)
+        public async Task<bool> UserExists(Guid userId)
         {
-            return _userContext.Users.AsNoTracking().Any(a => a.Id == userId);
+            return await _userContext.Users.AsNoTracking().AnyAsync(a => a.Id == userId);
         }
 
         public async Task<bool> EmailExists(string email)
