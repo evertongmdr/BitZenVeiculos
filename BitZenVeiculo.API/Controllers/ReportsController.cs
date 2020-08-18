@@ -9,7 +9,6 @@ using System.Data;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net.Http;
 using System.Threading.Tasks;
 using static BitZenVeiculos.Domain.DTOs.ReportDTO;
 
@@ -120,7 +119,7 @@ namespace BitZenVeiculos.API.Controllers
 
             dynamic report = new ExpandoObject();
             var reportDic = (IDictionary<string, object>)report;
-            for (int j = 0; j < diffMonths; j++)
+            for (int j = 0; j <= diffMonths; j++)
             {
                 var fuelSupplyMonth = fuelSupply.Where(fs => fs.DateOfSupply.Month == start.AddMonths(j).Month).ToList();
                 sumMileage = 0;
@@ -187,6 +186,111 @@ namespace BitZenVeiculos.API.Controllers
 
             return Ok(reportDic);
         }
+
+        //api/reports/average-fuel
+        [HttpGet("average-fuel")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> GetAverageFuel([FromBody] ReportRequestDTO liter)
+        {
+
+            DateTime start = liter.Start;
+            DateTime end = liter.End;
+
+            var diffMonths = DiffMonths(start, end);
+
+            var whereGetFuelSupply = WhereGetFuelSupply(start, end);
+
+            var fuelSupply = await _reportContext.FuelsSuplly.
+               Where(whereGetFuelSupply).ToListAsync();
+
+            var vechilesIds = fuelSupply.Select(fs => fs.VehicleId).ToList();
+
+            var vehiclesFueldMonths = await _reportContext.Vehicles.Where(v => vechilesIds.Contains(v.Id)).ToListAsync();
+
+            decimal sumMileage = 0;
+            decimal sumLiters = 0;
+
+            dynamic report = new ExpandoObject();
+            var reportDic = (IDictionary<string, object>)report;
+            for (int j = 0; j <= diffMonths; j++)
+            {
+                var fuelSupplyMonth = fuelSupply.Where(fs => fs.DateOfSupply.Month == start.AddMonths(j).Month).ToList();
+                sumMileage = 0;
+                sumLiters = 0;
+
+                if (fuelSupplyMonth.Count() > 0)
+                {
+                    foreach (var vehicle in vehiclesFueldMonths)
+                    {
+                        var fuelSupplyMonthThisVehicle = fuelSupplyMonth.Where(fs => fs.VehicleId == vehicle.Id)
+                            .OrderBy(fs => fs.DateOfSupply).ToList();
+
+                        int tamFSThisVehicle = fuelSupplyMonthThisVehicle.Count();
+
+                        if (tamFSThisVehicle > 1)
+                        {
+                            var fsAux = _reportContext.FuelsSuplly.Where(fs => fs.VehicleId == vehicle.Id && fs.DateOfSupply < fuelSupplyMonthThisVehicle[0].DateOfSupply)
+                               .OrderBy(fs => fs.DateOfSupply).Take(1).ToList();
+
+
+                            if (fsAux.Count() == 0)
+                            {
+                                sumMileage += fuelSupplyMonthThisVehicle[0].SupplyedMileage - vehicle.Mileage;
+                                sumLiters = fuelSupplyMonthThisVehicle[0].SupplyedLiters;
+                            }
+                            else
+                            {
+                                sumMileage += fuelSupplyMonthThisVehicle[0].SupplyedMileage - fsAux[0].SupplyedMileage;
+                                sumLiters = fuelSupplyMonthThisVehicle[0].SupplyedLiters;
+                            }
+
+                            for (int i = 0; i < tamFSThisVehicle - 1; i++)
+                            {
+                                sumMileage += fuelSupplyMonthThisVehicle[i + 1].SupplyedMileage - fuelSupplyMonthThisVehicle[i].SupplyedMileage;
+                                sumLiters = fuelSupplyMonthThisVehicle[i + 1].SupplyedLiters;
+                            }
+
+
+                        }
+                        else
+                        {
+
+                            if (tamFSThisVehicle != 0)
+                            {
+                                var fsAux = _reportContext.FuelsSuplly.Where(fs => fs.VehicleId == vehicle.Id && fs.DateOfSupply < fuelSupplyMonthThisVehicle[0].DateOfSupply)
+                                .OrderBy(fs => fs.DateOfSupply).Take(1).ToList();
+
+
+                                if (fsAux.Count() == 0)
+                                {
+                                    sumMileage += fuelSupplyMonthThisVehicle[0].SupplyedMileage - vehicle.Mileage;
+                                    sumLiters = fuelSupplyMonthThisVehicle[0].SupplyedLiters;
+                                }
+                                else
+                                {
+                                    sumMileage += fuelSupplyMonthThisVehicle[0].SupplyedMileage - fsAux[0].SupplyedMileage;
+                                    sumLiters = fuelSupplyMonthThisVehicle[0].SupplyedLiters;
+                                }
+
+                            }
+                        }
+
+                    }
+                }
+
+                
+              
+                decimal media = 0;
+                if(sumMileage>0)
+                    media = sumMileage / sumLiters;
+                reportDic.Add(start.AddMonths(j).ToString("MMMM"), media);
+
+
+            }
+
+            return Ok(reportDic);
+        }
+
 
         private int DiffMonths(DateTime start, DateTime end)
         {
